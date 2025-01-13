@@ -1,0 +1,178 @@
+definitions:
+  storages.Song:
+    properties:
+      group:
+        type: string
+      id:
+        type: integer
+      song:
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact:
+    email: support@currencywallet.com
+    name: API Support
+  description: API for searsh songs.
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+  title: Songs API
+  version: "1.0"
+paths:
+  /songs:
+    get:
+      description: Fetch a paginated list of songs filtered by group and song name
+      parameters:
+      - description: Group name filter
+        in: query
+        name: group
+        type: string
+      - description: Song name filter
+        in: query
+        name: song
+        type: string
+      - default: 1
+        description: Page number
+        in: query
+        name: page
+        type: integer
+      - default: 10
+        description: Items per page
+        in: query
+        name: limit
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/storages.Song'
+            type: array
+        "500":
+          description: Failed to fetch songs
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get a list of songs
+      tags:
+      - Songs
+    post:
+      description: Add a new song to the database
+      parameters:
+      - description: Song data
+        in: body
+        name: song
+        required: true
+        schema:
+          $ref: '#/definitions/storages.Song'
+      responses:
+        "201":
+          description: Song added
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Failed to add song
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Failed to add song
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Add a new song
+      tags:
+      - Songs
+  /songs/{id}:
+    delete:
+      description: Remove a song by its ID
+      parameters:
+      - description: Song ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: Song deleted
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Failed to delete song
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Delete a song
+      tags:
+      - Songs
+    put:
+      description: Update a song's details by its ID
+      parameters:
+      - description: Song ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Song data
+        in: body
+        name: song
+        required: true
+        schema:
+          $ref: '#/definitions/storages.Song'
+      responses:
+        "200":
+          description: Successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Invalid input for updating song
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Failed to update song
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Update a song
+      tags:
+      - Songs
+  /songs/{id}/lyrics:
+    get:
+      description: Fetch a paginated list of lyrics for a specific song
+      parameters:
+      - description: Song ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - default: 1
+        description: Page number
+        in: query
+        name: page
+        type: integer
+      - default: 1
+        description: Items per page
+        in: query
+        name: limit
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              type: string
+            type: array
+        "500":
+          description: Failed to fetch lyrics
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get song lyrics
+      tags:
+      - Lyrics
+swagger: "2.0"
