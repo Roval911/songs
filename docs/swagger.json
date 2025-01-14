@@ -17,35 +17,35 @@
     "paths": {
         "/songs": {
             "get": {
-                "description": "Fetch a paginated list of songs filtered by group and song name",
+                "description": "Получить список песен с пагинацией, отфильтрованный по названию группы и песни",
                 "tags": [
-                    "Songs"
+                    "Песни"
                 ],
-                "summary": "Get a list of songs",
+                "summary": "Получить список песен",
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Group name filter",
+                        "description": "Фильтр по названию группы",
                         "name": "group",
                         "in": "query"
                     },
                     {
                         "type": "string",
-                        "description": "Song name filter",
+                        "description": "Фильтр по названию песни",
                         "name": "song",
                         "in": "query"
                     },
                     {
                         "type": "integer",
                         "default": 1,
-                        "description": "Page number",
+                        "description": "Номер страницы",
                         "name": "page",
                         "in": "query"
                     },
                     {
                         "type": "integer",
                         "default": 10,
-                        "description": "Items per page",
+                        "description": "Количество элементов на странице",
                         "name": "limit",
                         "in": "query"
                     }
@@ -60,8 +60,15 @@
                             }
                         }
                     },
+                    "400": {
+                        "description": "Неверные параметры запроса",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
                     "500": {
-                        "description": "Failed to fetch songs",
+                        "description": "Не удалось получить песни",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
@@ -70,14 +77,14 @@
                 }
             },
             "post": {
-                "description": "Add a new song to the database",
+                "description": "Добавить новую песню в базу данных",
                 "tags": [
-                    "Songs"
+                    "Песни"
                 ],
-                "summary": "Add a new song",
+                "summary": "Добавить новую песню",
                 "parameters": [
                     {
-                        "description": "Song data",
+                        "description": "Данные о песне",
                         "name": "song",
                         "in": "body",
                         "required": true,
@@ -88,103 +95,21 @@
                 ],
                 "responses": {
                     "201": {
-                        "description": "Song added",
+                        "description": "Песня добавлена",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
                         }
                     },
                     "400": {
-                        "description": "Failed to add song",
+                        "description": "Неверные данные для добавления песни",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
                         }
                     },
                     "500": {
-                        "description": "Failed to add song",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    }
-                }
-            }
-        },
-        "/songs/{id}": {
-            "put": {
-                "description": "Update a song's details by its ID",
-                "tags": [
-                    "Songs"
-                ],
-                "summary": "Update a song",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "Song ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "Song data",
-                        "name": "song",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/storages.Song"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Successfully",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid input for updating song",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "500": {
-                        "description": "Failed to update song",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    }
-                }
-            },
-            "delete": {
-                "description": "Remove a song by its ID",
-                "tags": [
-                    "Songs"
-                ],
-                "summary": "Delete a song",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "Song ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Song deleted",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "500": {
-                        "description": "Failed to delete song",
+                        "description": "Не удалось добавить песню",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
@@ -195,15 +120,15 @@
         },
         "/songs/{id}/lyrics": {
             "get": {
-                "description": "Fetch a paginated list of lyrics for a specific song",
+                "description": "Получить текст песни с пагинацией для конкретной песни",
                 "tags": [
-                    "Lyrics"
+                    "Тексты песен"
                 ],
-                "summary": "Get song lyrics",
+                "summary": "Получить текст песни",
                 "parameters": [
                     {
                         "type": "integer",
-                        "description": "Song ID",
+                        "description": "ID песни",
                         "name": "id",
                         "in": "path",
                         "required": true
@@ -211,14 +136,14 @@
                     {
                         "type": "integer",
                         "default": 1,
-                        "description": "Page number",
+                        "description": "Номер страницы",
                         "name": "page",
                         "in": "query"
                     },
                     {
                         "type": "integer",
                         "default": 1,
-                        "description": "Items per page",
+                        "description": "Количество элементов на странице",
                         "name": "limit",
                         "in": "query"
                     }
@@ -233,8 +158,72 @@
                             }
                         }
                     },
+                    "400": {
+                        "description": "Неверные параметры запроса",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
                     "500": {
-                        "description": "Failed to fetch lyrics",
+                        "description": "Не удалось получить текст песни",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/songs/{id}/partial": {
+            "put": {
+                "description": "Обновить одно или несколько свойств песни по ее ID",
+                "tags": [
+                    "Песни"
+                ],
+                "summary": "Частичное обновление информации о песне",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "ID песни",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Данные о песне",
+                        "name": "song",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/storages.Song"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Успешно",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Неверные данные для обновления песни",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "Песня не найдена",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Не удалось обновить песню",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
@@ -251,8 +240,17 @@
                 "group": {
                     "type": "string"
                 },
+                "group_id": {
+                    "type": "integer"
+                },
                 "id": {
                     "type": "integer"
+                },
+                "link": {
+                    "type": "string"
+                },
+                "releaseDate": {
+                    "type": "string"
                 },
                 "song": {
                     "type": "string"

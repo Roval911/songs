@@ -6,4 +6,6 @@ type Storages interface {
 	DeleteSong(id int) error
 	UpdateSong(id int, song Song) error
 	AddSong(song Song) error
+	AddLyrics(songID int, line string) error
+	UpdateSongPartial(id int, updates map[string]interface{}) error
 }

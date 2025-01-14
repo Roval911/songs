@@ -3,8 +3,14 @@ definitions:
     properties:
       group:
         type: string
+      group_id:
+        type: integer
       id:
         type: integer
+      link:
+        type: string
+      releaseDate:
+        type: string
       song:
         type: string
     type: object
@@ -22,23 +28,24 @@ info:
 paths:
   /songs:
     get:
-      description: Fetch a paginated list of songs filtered by group and song name
+      description: Получить список песен с пагинацией, отфильтрованный по названию
+        группы и песни
       parameters:
-      - description: Group name filter
+      - description: Фильтр по названию группы
         in: query
         name: group
         type: string
-      - description: Song name filter
+      - description: Фильтр по названию песни
         in: query
         name: song
         type: string
       - default: 1
-        description: Page number
+        description: Номер страницы
         in: query
         name: page
         type: integer
       - default: 10
-        description: Items per page
+        description: Количество элементов на странице
         in: query
         name: limit
         type: integer
@@ -49,18 +56,23 @@ paths:
             items:
               $ref: '#/definitions/storages.Song'
             type: array
-        "500":
-          description: Failed to fetch songs
+        "400":
+          description: Неверные параметры запроса
           schema:
             additionalProperties: true
             type: object
-      summary: Get a list of songs
+        "500":
+          description: Не удалось получить песни
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Получить список песен
       tags:
-      - Songs
+      - Песни
     post:
-      description: Add a new song to the database
+      description: Добавить новую песню в базу данных
       parameters:
-      - description: Song data
+      - description: Данные о песне
         in: body
         name: song
         required: true
@@ -68,95 +80,39 @@ paths:
           $ref: '#/definitions/storages.Song'
       responses:
         "201":
-          description: Song added
+          description: Песня добавлена
           schema:
             additionalProperties: true
             type: object
         "400":
-          description: Failed to add song
+          description: Неверные данные для добавления песни
           schema:
             additionalProperties: true
             type: object
         "500":
-          description: Failed to add song
+          description: Не удалось добавить песню
           schema:
             additionalProperties: true
             type: object
-      summary: Add a new song
+      summary: Добавить новую песню
       tags:
-      - Songs
-  /songs/{id}:
-    delete:
-      description: Remove a song by its ID
-      parameters:
-      - description: Song ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      responses:
-        "200":
-          description: Song deleted
-          schema:
-            additionalProperties: true
-            type: object
-        "500":
-          description: Failed to delete song
-          schema:
-            additionalProperties: true
-            type: object
-      summary: Delete a song
-      tags:
-      - Songs
-    put:
-      description: Update a song's details by its ID
-      parameters:
-      - description: Song ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      - description: Song data
-        in: body
-        name: song
-        required: true
-        schema:
-          $ref: '#/definitions/storages.Song'
-      responses:
-        "200":
-          description: Successfully
-          schema:
-            additionalProperties: true
-            type: object
-        "400":
-          description: Invalid input for updating song
-          schema:
-            additionalProperties: true
-            type: object
-        "500":
-          description: Failed to update song
-          schema:
-            additionalProperties: true
-            type: object
-      summary: Update a song
-      tags:
-      - Songs
+      - Песни
   /songs/{id}/lyrics:
     get:
-      description: Fetch a paginated list of lyrics for a specific song
+      description: Получить текст песни с пагинацией для конкретной песни
       parameters:
-      - description: Song ID
+      - description: ID песни
         in: path
         name: id
         required: true
         type: integer
       - default: 1
-        description: Page number
+        description: Номер страницы
         in: query
         name: page
         type: integer
       - default: 1
-        description: Items per page
+        description: Количество элементов на странице
         in: query
         name: limit
         type: integer
@@ -167,12 +123,56 @@ paths:
             items:
               type: string
             type: array
-        "500":
-          description: Failed to fetch lyrics
+        "400":
+          description: Неверные параметры запроса
           schema:
             additionalProperties: true
             type: object
-      summary: Get song lyrics
+        "500":
+          description: Не удалось получить текст песни
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Получить текст песни
       tags:
-      - Lyrics
+      - Тексты песен
+  /songs/{id}/partial:
+    put:
+      description: Обновить одно или несколько свойств песни по ее ID
+      parameters:
+      - description: ID песни
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Данные о песне
+        in: body
+        name: song
+        required: true
+        schema:
+          $ref: '#/definitions/storages.Song'
+      responses:
+        "200":
+          description: Успешно
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Неверные данные для обновления песни
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Песня не найдена
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Не удалось обновить песню
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Частичное обновление информации о песне
+      tags:
+      - Песни
 swagger: "2.0"

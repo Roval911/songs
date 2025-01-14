@@ -51,8 +51,13 @@ func New() (*App, error) {
 	// Создание хранилища данных для работы с PostgreSQL
 	storage := postgres.NewPostgresStorage(db)
 
+	err = storage.CreateIndexes()
+	if err != nil {
+		return nil, fmt.Errorf("ошибка при создании индексов: %v", err)
+	}
+
 	// Создание обработчиков для аутентификации и обмена валютами
-	Handler := hanlers.NewHandler(storage, log)
+	Handler := hanlers.NewHandler(storage, log, cfg)
 
 	// Настройка маршрутов для HTTP-сервера с использованием Gin
 	router := routes.SetupRouter(Handler)

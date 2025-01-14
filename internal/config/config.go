@@ -25,6 +25,10 @@ type Config struct {
 	ExchangeService struct {
 		Address string `envconfig:"EXCHANGE_SERVICE_ADDRESS" required:"true"`
 	}
+
+	ExternalAPI struct {
+		Address string `envconfig:"EXTERNAL_API_ADDRESS" required:"true"`
+	}
 }
 
 // Структура для хранения параметров подключения к базе данных PostgreSQL

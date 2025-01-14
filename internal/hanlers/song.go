@@ -18,6 +18,7 @@ import (
 // @Param page query int false "Номер страницы" default(1)
 // @Param limit query int false "Количество элементов на странице" default(10)
 // @Success 200 {array} storages.Song
+// @Failure 400 {object} map[string]interface{} "Неверные параметры запроса"
 // @Failure 500 {object} map[string]interface{} "Не удалось получить песни"
 // @Router /songs [get]
 func (h *Handler) GetSongs(c *gin.Context) {
@@ -46,6 +47,7 @@ func (h *Handler) GetSongs(c *gin.Context) {
 // @Param page query int false "Номер страницы" default(1)
 // @Param limit query int false "Количество элементов на странице" default(1)
 // @Success 200 {array} string
+// @Failure 400 {object} map[string]interface{} "Неверные параметры запроса"
 // @Failure 500 {object} map[string]interface{} "Не удалось получить текст песни"
 // @Router /songs/{id}/lyrics [get]
 func (h *Handler) GetLyrics(c *gin.Context) {
@@ -71,8 +73,11 @@ func (h *Handler) GetLyrics(c *gin.Context) {
 // @Tags Песни
 // @Param id path int true "ID песни"
 // @Success 200 {object} map[string]interface{} "Песня удалена"
+// @Failure 400 {object} map[string]interface{} "Неверный ID песни"
+// @Failure 404 {object} map[string]interface{} "Песня не найдена"
 // @Failure 500 {object} map[string]interface{} "Не удалось удалить песню"
 // @Router /songs/{id} [delete]
+
 func (h *Handler) DeleteSong(c *gin.Context) {
 	id, _ := strconv.Atoi(c.Param("id"))
 
@@ -89,29 +94,30 @@ func (h *Handler) DeleteSong(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Песня удалена"})
 }
 
-// UpdateSong
-// @Summary Обновить информацию о песне
-// @Description Обновить данные о песне по ее ID
+// UpdateSongPartial
+// @Summary Частичное обновление информации о песне
+// @Description Обновить одно или несколько свойств песни по ее ID
 // @Tags Песни
 // @Param id path int true "ID песни"
 // @Param song body storages.Song true "Данные о песне"
 // @Success 200 {object} map[string]interface{} "Успешно"
 // @Failure 400 {object} map[string]interface{} "Неверные данные для обновления песни"
+// @Failure 404 {object} map[string]interface{} "Песня не найдена"
 // @Failure 500 {object} map[string]interface{} "Не удалось обновить песню"
-// @Router /songs/{id} [put]
-func (h *Handler) UpdateSong(c *gin.Context) {
+// @Router /songs/{id}/partial [put]
+func (h *Handler) UpdateSongPartial(c *gin.Context) {
 	id, _ := strconv.Atoi(c.Param("id"))
 
-	var song storages.Song
-	if err := c.ShouldBindJSON(&song); err != nil {
+	var updates map[string]interface{}
+	if err := c.ShouldBindJSON(&updates); err != nil {
 		h.logger.Errorf("Неверные данные для обновления песни с ID=%d: %v", id, err)
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Неверные данные", "details": err.Error()})
 		return
 	}
 
-	h.logger.Infof("Обновление песни с ID=%d, данные=%+v", id, song)
+	h.logger.Infof("Обновление песни с ID=%d, изменения=%+v", id, updates)
 
-	err := h.storage.UpdateSong(id, song)
+	err := h.storage.UpdateSongPartial(id, updates)
 	if err != nil {
 		h.logger.Errorf("Не удалось обновить песню с ID=%d: %v", id, err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Не удалось обновить песню", "details": err.Error()})
@@ -128,7 +134,7 @@ func (h *Handler) UpdateSong(c *gin.Context) {
 // @Tags Песни
 // @Param song body storages.Song true "Данные о песне"
 // @Success 201 {object} map[string]interface{} "Песня добавлена"
-// @Failure 400 {object} map[string]interface{} "Не удалось добавить песню"
+// @Failure 400 {object} map[string]interface{} "Неверные данные для добавления песни"
 // @Failure 500 {object} map[string]interface{} "Не удалось добавить песню"
 // @Router /songs [post]
 func (h *Handler) AddSong(c *gin.Context) {
@@ -150,6 +156,9 @@ func (h *Handler) AddSong(c *gin.Context) {
 
 	h.logger.Infof("Детали песни с внешнего API: %+v", songDetail)
 
+	song.ReleaseDate = songDetail.ReleaseDate
+	song.Link = songDetail.Link
+
 	err = h.storage.AddSong(song)
 	if err != nil {
 		h.logger.Errorf("Не удалось добавить песню: %v", err)
@@ -157,12 +166,21 @@ func (h *Handler) AddSong(c *gin.Context) {
 		return
 	}
 
+	for _, line := range songDetail.Text {
+		err = h.storage.AddLyrics(song.ID, line)
+		if err != nil {
+			h.logger.Errorf("Не удалось добавить текст песни: %v", err)
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Не удалось добавить текст песни", "details": err.Error()})
+			return
+		}
+	}
+
 	h.logger.Infof("Песня успешно добавлена: %+v", song)
 	c.JSON(http.StatusCreated, gin.H{"message": "Песня добавлена", "details": songDetail})
 }
 
 func (h *Handler) getSongDetail(group string, song string) (*storages.SongDetail, error) {
-	apiURL := "http://external-api-url/info?group=" + group + "&song=" + song
+	apiURL := fmt.Sprintf("%s/info?group=%s&song=%s", h.config.ExternalAPI.Address, group, song)
 
 	resp, err := http.Get(apiURL)
 	if err != nil {

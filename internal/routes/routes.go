@@ -23,7 +23,7 @@ func SetupRouter(songHandler *hanlers.Handler) *gin.Engine {
 		public.GET("/song/:id/lyrics", songHandler.GetLyrics)
 		public.POST("/song", songHandler.AddSong)
 		public.DELETE("/song/:id", songHandler.DeleteSong)
-		public.PUT("/song/:id", songHandler.UpdateSong)
+		public.PUT("/song/:id", songHandler.UpdateSongPartial)
 	}
 
 	return router
